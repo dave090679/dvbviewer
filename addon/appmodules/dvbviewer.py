@@ -16,20 +16,29 @@ import dvbviewerhelper
 from logHandler import log
 import api
 class dvbv_eventsink(object):
+	def __init__(self, server):
+		super(dvbv_eventsink, self).__init__()
+		self.dvbviewer = server
+		self.current = dict()
 	def IDVBViewerEvents_onAction(self,ActionID):
 		log.debugWarning("IDVBViewerEvents_onAction("+str(ActionID)+")")
 	def IDVBViewerEvents_onControlChange(self,WindowID, ControlID):
-		# ui.message(self.server.datamanager.value('#currentcontrol'))
+		self.current['control'] = self.dvbviewer.datamanager.Value('#currentcontrol')
 		log.debugWarning("IDVBViewerEvents_onControlChange("+str(WindowID)+", "+str(ControlID))
 	def IDVBViewerEvents_OnPlaystatechange(self,RendererType, State):
 		log.debugWarning("IDVBViewerEvents_OnPlaystatechange("+str(RendererType)+', '+str(State))
 
 	def IDVBViewerEvents_onSelectedItemChange(self):
-		# ui.message(self.server.datamanager.value('#selecteditem'))
+		self.current['item'] = self.dvbviewer.datamanager.Value('#selecteditem')
+		msg = ''
+		if self.current.has_key('window') and self.current['window']: msg = self.current['window']
+		if self.current.has_key('control') and self.current['control']: msg += ' '+self.current['control']
+		if self.current.has_key('item') and self.current['item']: msg += ' '+self.current['item']
+		ui.message(msg)
 		log.debugWarning("IDVBViewerEvents_onSelectedItemChange()")
 	def IDVBViewerEvents_onOSDWindow(self,WindowID):
-		log.debugWarning("IDVBViewerEvents_onOSDWindow("+str(ID)+")")
-		# ui.message(self.server.datamanager.value('#currentwindow'))
+		self.current['window'] = self.dvbviewer.datamanager.Value('#currentwindow')
+		log.debugWarning("IDVBViewerEvents_onOSDWindow("+str(WindowID)+")")
 
 class AppModule(appModuleHandler.AppModule):
 	def terminate(self):
@@ -39,8 +48,8 @@ class AppModule(appModuleHandler.AppModule):
 	def __init__(self, *flags, **kwflags):
 		super(AppModule, self).__init__(*flags, **kwflags)
 		time.sleep(10)
-		self.dvbviewer = comtypes.client.GetActiveObject(dvbviewerhelper.DVBViewer, interface=dvbviewerhelper.IDVBViewer)
-		self.connection = comtypes.client.GetEvents(self.dvbviewer.Events,dvbv_eventsink(),dvbviewerhelper.IDVBViewerEvents)
+		self.dvbviewer = comtypes.client.GetActiveObject("DVBViewerServer.DVBViewer", interface=dvbviewerhelper.IDVBViewer)
+		self.connection = comtypes.client.GetEvents(self.dvbviewer.Events,dvbv_eventsink(self.dvbviewer),dvbviewerhelper.IDVBViewerEvents)
 
 
 
