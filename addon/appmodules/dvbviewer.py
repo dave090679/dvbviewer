@@ -15,6 +15,7 @@ sys.path.append(impPath)
 import dvbviewerhelper
 from logHandler import log
 import api
+import comHelper
 class dvbv_eventsink(object):
 	def __init__(self, server):
 		super(dvbv_eventsink, self).__init__()
@@ -48,7 +49,7 @@ class AppModule(appModuleHandler.AppModule):
 	def __init__(self, *flags, **kwflags):
 		super(AppModule, self).__init__(*flags, **kwflags)
 		time.sleep(10)
-		self.dvbviewer = comtypes.client.GetActiveObject("DVBViewerServer.DVBViewer", interface=dvbviewerhelper.IDVBViewer)
+		self.dvbviewer = comHelper.getActiveObject("DVBViewerServer.DVBViewer", dynamic=True)
 		self.connection = comtypes.client.GetEvents(self.dvbviewer.Events,dvbv_eventsink(self.dvbviewer),dvbviewerhelper.IDVBViewerEvents)
 
 
