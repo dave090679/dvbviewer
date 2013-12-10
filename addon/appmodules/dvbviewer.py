@@ -50,7 +50,8 @@ class AppModule(appModuleHandler.AppModule):
 		super(AppModule, self).__init__(*flags, **kwflags)
 		time.sleep(10)
 		self.dvbviewer = comHelper.getActiveObject("DVBViewerServer.DVBViewer", dynamic=True)
-		self.connection = comtypes.client.GetEvents(self.dvbviewer.Events,dvbv_eventsink(self.dvbviewer),dvbviewerhelper.IDVBViewerEvents)
+		self.eventsink = dvbv_eventsink(self.dvbviewer)
+		self.connection = comtypes.client.GetEvents(self.dvbviewer.Events,self.eventsink,dvbviewerhelper.IDVBViewerEvents)
 
 
 
